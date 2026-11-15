@@ -10,10 +10,10 @@ jobs:
   upload:
     runs-on: macos-15
     timeout-minutes: 45
-    env:
-      KEYCHAIN_PATH: ${{ runner.temp }}/signing.keychain-db
     steps:
       - uses: actions/checkout@v4
+      - name: Initialize signing paths
+        run: echo "KEYCHAIN_PATH=$RUNNER_TEMP/signing.keychain-db" >> "$GITHUB_ENV"
       - name: Select Xcode 26 or newer
         run: |
           python3 - <<'PY'
