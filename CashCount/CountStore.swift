@@ -21,13 +21,17 @@ struct MoneyCount: Codable, Equatable {
         else { loose[String(denomination)] = Self.normalized(text) }
     }
 
-    var total: Int {
-        Self.denominations.reduce(0) { sum, denomination in
-            let looseCount = min(max(count(denomination, roll: false), 0), 999999)
-            let rollCount = denomination <= 500 ? min(max(count(denomination, roll: true), 0), 999999) : 0
-            return sum + denomination * (looseCount + rollCount * 50)
-        }
+    func subtotal(_ denomination: Int) -> Int {
+        guard Self.denominations.contains(denomination) else { return 0 }
+        let looseCount = min(max(count(denomination, roll: false), 0), 999999)
+        let rollCount = denomination <= 500 ? min(max(count(denomination, roll: true), 0), 999999) : 0
+        return denomination * (looseCount + rollCount * 50)
     }
+
+    var total: Int {
+        Self.denominations.reduce(0) { $0 + subtotal($1) }
+    }
+
 }
 
 final class CountStore: ObservableObject {

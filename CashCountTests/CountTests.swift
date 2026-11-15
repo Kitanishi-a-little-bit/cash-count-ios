@@ -26,6 +26,20 @@ final class CountTests: XCTestCase {
         XCTAssertEqual(count.total, 36000)
     }
 
+    func testSubtotalsAcrossDenominations() {
+        var count = MoneyCount()
+        count.set("2", denomination: 10000, roll: false)
+        count.set("12", denomination: 100, roll: false)
+        count.set("3", denomination: 100, roll: true)
+        XCTAssertEqual(count.subtotal(10000), 20000)
+        XCTAssertEqual(count.subtotal(100), 16200)
+        XCTAssertEqual(count.subtotal(500), 0)
+        XCTAssertEqual(count.total, 36200)
+        count.set("0", denomination: 100, roll: true)
+        XCTAssertEqual(count.subtotal(100), 1200)
+        XCTAssertEqual(count.total, 21200)
+    }
+
     func testInputNormalization() {
         XCTAssertEqual(MoneyCount.normalized(""), 0)
         XCTAssertEqual(MoneyCount.normalized("１２３"), 123)

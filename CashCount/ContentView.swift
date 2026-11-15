@@ -30,22 +30,32 @@ struct ContentView: View {
 
             ScrollViewReader { proxy in
                 ScrollView {
-                    Grid(horizontalSpacing: 12, verticalSpacing: 4) {
+                    Grid(horizontalSpacing: 6, verticalSpacing: 4) {
                         GridRow {
                             Text("金種")
                             Text("枚数")
                             Text("ロール")
+                            Text("小計（円）")
                         }
                         .font(.caption)
                         .foregroundStyle(.secondary)
                         ForEach(MoneyCount.denominations, id: \.self) { value in
                             GridRow {
                                 Text("\(value.formatted())円")
-                                    .font(.body.weight(.medium))
+                                    .font(.subheadline.weight(.medium))
+                                    .lineLimit(1)
+                                    .minimumScaleFactor(0.7)
                                     .frame(maxWidth: .infinity, alignment: .trailing)
                                 input(value, roll: false)
                                 if value <= 500 { input(value, roll: true) }
                                 else { Color.clear.gridCellUnsizedAxes([.horizontal, .vertical]) }
+                                Text(store.accounts[account].subtotal(value).formatted())
+                                    .font(.subheadline.weight(.medium))
+                                    .monospacedDigit()
+                                    .lineLimit(1)
+                                    .minimumScaleFactor(0.5)
+                                    .frame(maxWidth: .infinity, alignment: .trailing)
+                                    .accessibilityLabel("\(value)円の小計 \(store.accounts[account].subtotal(value))円")
                             }
                             .id(value)
                         }
@@ -101,7 +111,7 @@ struct ContentView: View {
         .keyboardType(.numberPad)
         .multilineTextAlignment(.trailing)
         .monospacedDigit()
-        .padding(.horizontal, 10)
+        .padding(.horizontal, 6)
         .frame(maxWidth: .infinity, minHeight: 44)
         .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 8))
         .focused($focused, equals: Entry(denomination: value, roll: roll))
