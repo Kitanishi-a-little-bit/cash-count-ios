@@ -5,6 +5,7 @@ struct ContentView: View {
     @State private var account = 0
     @State private var showReset = false
     @FocusState private var focused: Entry?
+    @ScaledMetric(relativeTo: .body) private var tabletPanelHeight: CGFloat = 800
     private let names = ["レジ", "金庫"]
 
     private struct Entry: Hashable {
@@ -20,7 +21,17 @@ struct ContentView: View {
     }
 
     var body: some View {
-        VStack(spacing: 8) {
+        GeometryReader { geometry in
+            let spacious = geometry.size.width >= 700
+            countPanel(spacious: spacious)
+                .frame(maxWidth: 720)
+                .frame(height: spacious ? min(geometry.size.height, tabletPanelHeight) : geometry.size.height)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        }
+    }
+
+    private func countPanel(spacious: Bool) -> some View {
+        VStack(spacing: spacious ? 16 : 8) {
             Picker("保管場所", selection: $account) {
                 ForEach(0..<2) { Text(names[$0]).tag($0) }
             }
@@ -30,7 +41,7 @@ struct ContentView: View {
 
             ScrollViewReader { proxy in
                 ScrollView {
-                    Grid(horizontalSpacing: 6, verticalSpacing: 4) {
+                    Grid(horizontalSpacing: spacious ? 12 : 6, verticalSpacing: spacious ? 8 : 4) {
                         GridRow {
                             Text("金種")
                             Text("枚数")
@@ -42,15 +53,15 @@ struct ContentView: View {
                         ForEach(MoneyCount.denominations, id: \.self) { value in
                             GridRow {
                                 Text("\(value.formatted())円")
-                                    .font(.subheadline.weight(.medium))
+                                    .font(spacious ? .body.weight(.medium) : .subheadline.weight(.medium))
                                     .lineLimit(1)
                                     .minimumScaleFactor(0.7)
                                     .frame(maxWidth: .infinity, alignment: .trailing)
-                                input(value, roll: false)
-                                if value <= 500 { input(value, roll: true) }
+                                input(value, roll: false, spacious: spacious)
+                                if value <= 500 { input(value, roll: true, spacious: spacious) }
                                 else { Color.clear.gridCellUnsizedAxes([.horizontal, .vertical]) }
                                 Text(store.accounts[account].subtotal(value).formatted())
-                                    .font(.subheadline.bold())
+                                    .font(spacious ? .body.bold() : .subheadline.bold())
                                     .monospacedDigit()
                                     .lineLimit(1)
                                     .minimumScaleFactor(0.5)
@@ -69,7 +80,7 @@ struct ContentView: View {
                 }
             }
         }
-        .padding(.top, 8)
+        .padding(.top, spacious ? 24 : 8)
         .safeAreaInset(edge: .bottom, spacing: 0) {
             HStack {
                 Button("リセット", role: .destructive) { focused = nil; showReset = true }
@@ -100,7 +111,7 @@ struct ContentView: View {
         }
     }
 
-    private func input(_ value: Int, roll: Bool) -> some View {
+    private func input(_ value: Int, roll: Bool, spacious: Bool) -> some View {
         TextField("0", text: Binding(
             get: {
                 let count = store.accounts[account].count(value, roll: roll)
@@ -112,7 +123,7 @@ struct ContentView: View {
         .multilineTextAlignment(.trailing)
         .monospacedDigit()
         .padding(.horizontal, 6)
-        .frame(maxWidth: .infinity, minHeight: 44)
+        .frame(maxWidth: .infinity, minHeight: spacious ? 52 : 44)
         .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 8))
         .focused($focused, equals: Entry(denomination: value, roll: roll))
         .accessibilityLabel("\(value)円 \(roll ? "ロール数、1ロール50枚" : "枚数")")

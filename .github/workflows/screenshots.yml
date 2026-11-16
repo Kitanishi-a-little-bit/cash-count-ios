@@ -6,6 +6,7 @@ on:
     paths:
       - .github/workflows/screenshots.yml
       - scripts/capture-screenshots.py
+      - CashCount/**
 permissions:
   contents: read
 concurrency:
