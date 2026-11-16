@@ -35,7 +35,7 @@ struct ContentView: View {
                             Text("金種")
                             Text("枚数")
                             Text("ロール")
-                            Text("小計（円）").bold()
+                            Text("小計（円）")
                         }
                         .font(.caption)
                         .foregroundStyle(.secondary)
