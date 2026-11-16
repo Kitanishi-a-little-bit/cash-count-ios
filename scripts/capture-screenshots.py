@@ -20,9 +20,9 @@ if not ios:
     raise SystemExit('No iOS simulator runtime available')
 runtime = max(ios, key=lambda r: tuple(map(int, r['version'].split('.'))))
 types = json.loads(run('xcrun', 'simctl', 'list', 'devicetypes', '-j'))['devicetypes']
-# Store screenshot sizes: large iPhone and 13-inch iPad.
+# Capture 6.3-inch iPhone and 13-inch iPad.
 choices = {
-    'iphone': ['iPhone 17 Pro Max', 'iPhone 16 Pro Max'],
+    'iphone': ['iPhone 16 Pro', 'iPhone 17 Pro'],
     'ipad': ['iPad Pro 13-inch (M5)', 'iPad Pro 13-inch (M4)'],
 }
 metadata = {}
