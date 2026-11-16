@@ -31,20 +31,21 @@ jobs:
             -derivedDataPath build/screenshots CODE_SIGNING_ALLOWED=NO
       - name: Capture iPhone and iPad
         run: python3 scripts/capture-screenshots.py
-      - name: Compose iPhone store artwork
+      - name: Compose iPhone and iPad store artwork
         run: swift scripts/render-store-screenshots.swift
       - name: Validate store image sizes
         run: |
           python3 - <<'PY'
           import pathlib, struct
-          files = list(pathlib.Path("screenshots/store-iphone").glob("*.png"))
-          assert len(files) == 3, "Expected three store screenshots"
-          for file in files:
-              data = file.read_bytes()
-              assert data[:8] == b"\x89PNG\r\n\x1a\n", file
-              w, h, depth, color = struct.unpack(">IIBB", data[16:26])
-              assert (w, h, depth, color) == (1206, 2622, 8, 2), (file, w, h, depth, color)
-              print(f"{file}: {w}x{h}, opaque RGB")
+          for device, expected in [("iphone", (1206, 2622)), ("ipad", (2064, 2752))]:
+              files = list(pathlib.Path(f"screenshots/store-{device}").glob("*.png"))
+              assert len(files) == 3, f"Expected three {device} screenshots"
+              for file in files:
+                  data = file.read_bytes()
+                  assert data[:8] == b"\x89PNG\r\n\x1a\n", file
+                  w, h, depth, color = struct.unpack(">IIBB", data[16:26])
+                  assert (w, h, depth, color) == (*expected, 8, 2), (file, w, h, depth, color)
+                  print(f"{file}: {w}x{h}, opaque RGB")
           PY
       - name: Upload screenshots
         if: always()
