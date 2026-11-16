@@ -50,3 +50,11 @@ macOS ランナーの Xcode 26 以降で署名・アーカイブし、App Store 
 成功後も Apple 側の処理に時間がかかります。App Store Connect の TestFlight で処理完了を確認し、
 内部テストグループにビルドと自分を追加して iPhone の TestFlight からインストールします。
 このワークフローは App Store 本番公開や審査提出を行いません。
+
+## 掲載用スクリーンショット
+
+Actions → App Store screenshots → Run workflow で iPhone Pro Max と
+13インチ iPad Pro のシミュレータから実際のアプリ画面を撮影します。
+`app-store-screenshots` アーティファクトに PNG と撮影機種情報が入ります。
+撮影専用の新規シミュレータに架空の入力データを入れるため、実機データは変わりません。
+公開前に画像を開き、日本語表示・入力値・合計98,185円・画面全体を確認してください。
