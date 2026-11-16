@@ -35,7 +35,7 @@ struct ContentView: View {
                             Text("金種")
                             Text("枚数")
                             Text("ロール")
-                            Text("小計（円）")
+                            Text("小計（円）").bold()
                         }
                         .font(.caption)
                         .foregroundStyle(.secondary)
@@ -50,7 +50,7 @@ struct ContentView: View {
                                 if value <= 500 { input(value, roll: true) }
                                 else { Color.clear.gridCellUnsizedAxes([.horizontal, .vertical]) }
                                 Text(store.accounts[account].subtotal(value).formatted())
-                                    .font(.subheadline.weight(.medium))
+                                    .font(.subheadline.bold())
                                     .monospacedDigit()
                                     .lineLimit(1)
                                     .minimumScaleFactor(0.5)
