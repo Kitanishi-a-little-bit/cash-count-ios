@@ -25,10 +25,14 @@ func text(_ value: String, top: CGFloat, size: CGFloat, color: NSColor, bold: Bo
 }
 
 for (name, title, subtitle, footer) in designs {
-    guard let bitmap = NSBitmapImageRep(bitmapDataPlanes: nil, pixelsWide: width, pixelsHigh: height,
-                                      bitsPerSample: 8, samplesPerPixel: 3, hasAlpha: false, isPlanar: false,
-                                      colorSpaceName: .deviceRGB, bytesPerRow: 0, bitsPerPixel: 0),
-          let context = NSGraphicsContext(bitmapImageRep: bitmap) else { fatalError("Cannot create RGB canvas") }
+    // Core Graphics drawing requires a supported 32-bit RGB layout. A 24-bit
+    // NSBitmapImageRep may exist but cannot provide an NSGraphicsContext.
+    guard let canvas = CGContext(data: nil, width: width, height: height,
+                                 bitsPerComponent: 8, bytesPerRow: width * 4,
+                                 space: CGColorSpaceCreateDeviceRGB(),
+                                 bitmapInfo: CGImageAlphaInfo.noneSkipLast.rawValue | CGBitmapInfo.byteOrder32Big.rawValue)
+    else { fatalError("Cannot create opaque 32-bit RGB canvas") }
+    let context = NSGraphicsContext(cgContext: canvas, flipped: false)
     NSGraphicsContext.saveGraphicsState()
     NSGraphicsContext.current = context
     context.imageInterpolation = .high
@@ -48,6 +52,8 @@ for (name, title, subtitle, footer) in designs {
     screenshot.draw(in: rect, from: .zero, operation: .copy, fraction: 1)
     text(footer, top: 2460, size: 34, color: ink, bold: true)
     NSGraphicsContext.restoreGraphicsState()
+    guard let image = canvas.makeImage() else { fatalError("Cannot export rendered image") }
+    let bitmap = NSBitmapImageRep(cgImage: image)
     guard let png = bitmap.representation(using: .png, properties: [:]) else { fatalError("PNG encoding failed") }
     try png.write(to: output.appendingPathComponent(name + ".png"))
     print("Created \(name).png: \(width)x\(height), RGB")
