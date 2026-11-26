@@ -34,11 +34,22 @@ targets:
     settings:
       base:
         GENERATE_INFOPLIST_FILE: YES
+  CashCountUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources: [CashCountUITests]
+    dependencies:
+      - target: CashCount
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        TEST_TARGET_NAME: CashCount
 schemes:
   CashCount:
     build:
       targets:
         CashCount: all
         CashCountTests: [test]
+        CashCountUITests: [test]
     test:
-      targets: [CashCountTests]
+      targets: [CashCountTests, CashCountUITests]

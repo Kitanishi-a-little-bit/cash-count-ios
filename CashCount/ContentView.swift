@@ -112,13 +112,10 @@ struct ContentView: View {
     }
 
     private func input(_ value: Int, roll: Bool, spacious: Bool) -> some View {
-        TextField("0", text: Binding(
-            get: {
-                let count = store.accounts[account].count(value, roll: roll)
-                return count == 0 ? "" : String(count)
-            },
-            set: { store.set($0, account: account, denomination: value, roll: roll) }
-        ))
+        CountField(count: store.accounts[account].count(value, roll: roll)) { text in
+            store.set(text, account: account, denomination: value, roll: roll)
+        }
+        .id(account)
         .keyboardType(.numberPad)
         .multilineTextAlignment(.trailing)
         .monospacedDigit()
@@ -135,5 +132,27 @@ struct ContentView: View {
             return
         }
         self.focused = entries[index + 1]
+    }
+}
+
+private struct CountField: View {
+    let count: Int
+    let onEdit: (String) -> Void
+    @State private var text = ""
+
+    private func display(_ value: Int) -> String {
+        value == 0 ? "" : String(value)
+    }
+
+    var body: some View {
+        TextField("0", text: $text)
+            .onChange(of: text) { _, edited in
+                let value = MoneyCount.normalized(edited)
+                text = display(value)
+                if value != count { onEdit(text) }
+            }
+            .onChange(of: count, initial: true) { _, value in
+                text = display(value)
+            }
     }
 }
