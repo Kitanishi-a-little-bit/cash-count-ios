@@ -16,7 +16,7 @@ final class CountPasteTests: XCTestCase {
         XCTAssertTrue(app.staticTexts["1円の小計 7円"].exists)
         field.doubleTap()
         let paste = app.descendants(matching: .any)
-            .matching(NSPredicate(format: "label IN %@ OR identifier == %@", ["Paste", "ペースト"], "Paste"))
+            .matching(NSPredicate(format: "label == %@ OR label == %@ OR identifier == %@", "Paste", "ペースト", "Paste"))
             .firstMatch
         guard paste.waitForExistence(timeout: 5) else {
             XCTFail("Paste action missing after selecting the count.\n\(app.debugDescription)")
