@@ -7,12 +7,19 @@ struct MoneyCount: Codable, Equatable {
     var rolls: [String: Int] = [:]
 
     static func normalized(_ text: String) -> Int {
-        let digits = text.compactMap { $0.wholeNumberValue }.prefix(6)
-        return digits.reduce(0) { $0 * 10 + $1 }
+        let digits = text.unicodeScalars.lazy.compactMap { scalar -> UInt32? in
+            switch scalar.value {
+            case 0x30...0x39: return scalar.value - 0x30       // 0–9
+            case 0xFF10...0xFF19: return scalar.value - 0xFF10 // ０–９
+            default: return nil
+            }
+        }
+        return digits.prefix(6).reduce(0) { $0 * 10 + Int($1) }
     }
 
     func count(_ denomination: Int, roll: Bool) -> Int {
-        (roll ? rolls : loose)[String(denomination), default: 0]
+        let stored = (roll ? rolls : loose)[String(denomination), default: 0]
+        return min(max(stored, 0), 999999)
     }
 
     mutating func set(_ text: String, denomination: Int, roll: Bool) {
@@ -23,8 +30,8 @@ struct MoneyCount: Codable, Equatable {
 
     func subtotal(_ denomination: Int) -> Int {
         guard Self.denominations.contains(denomination) else { return 0 }
-        let looseCount = min(max(count(denomination, roll: false), 0), 999999)
-        let rollCount = denomination <= 500 ? min(max(count(denomination, roll: true), 0), 999999) : 0
+        let looseCount = count(denomination, roll: false)
+        let rollCount = denomination <= 500 ? count(denomination, roll: true) : 0
         return denomination * (looseCount + rollCount * 50)
     }
 

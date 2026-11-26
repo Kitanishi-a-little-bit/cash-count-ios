@@ -47,6 +47,23 @@ final class CountTests: XCTestCase {
         XCTAssertEqual(MoneyCount.normalized("123456789"), 123456)
     }
 
+    func testPastingIntoOneYenCount() {
+        var count = MoneyCount()
+        for (paste, expected) in [("23", 23), ("⑫⑫⑫⑫⑫⑫", 0), ("⑫", 0),
+                                  ("⑫１2③３4５6７", 123456), ("９９９９９９９", 999999)] {
+            count.set(paste, denomination: 1, roll: false)
+            XCTAssertEqual(count.count(1, roll: false), expected, paste)
+            XCTAssertEqual(count.subtotal(1), expected, paste)
+        }
+    }
+
+    func testPreviouslySavedOversizedCountMatchesSubtotal() throws {
+        let data = Data(#"{"loose":{"1":1333332},"rolls":{}}"#.utf8)
+        let count = try JSONDecoder().decode(MoneyCount.self, from: data)
+        XCTAssertEqual(count.count(1, roll: false), 999999)
+        XCTAssertEqual(count.subtotal(1), 999999)
+    }
+
     func testPersistenceAndSeparateReset() throws {
         let suite = "CashCountTests.\(UUID().uuidString)"
         let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
